@@ -11,15 +11,15 @@ Side project efforts:
 """
 ##########################################################
 def calculate(dirname=''):
-    try:
-        inputData = generateInputFileDict()
-        weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
-        # once have it in the format wanted, then can perform further data clean up
-        # once clean up all the array data, then can perform analysis
-        return weatherDataDictObjectCleaned
-    except Exception as e:
-        print(e)
-        return e
+    # try:
+    inputData = generateInputFileDict()
+    weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
+    # once have it in the format wanted, then can perform further data clean up
+    # once clean up all the array data, then can perform analysis
+    return weatherDataDictObjectCleaned
+    # except Exception as e:
+    #     print(e)
+    #     return e
 
 ##########################################################
 if __name__ == '__main__':

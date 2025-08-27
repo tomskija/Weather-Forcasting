@@ -37,7 +37,6 @@ def parserFun(inputData={}, dirname=''):
         thisYear = str(inputData["idealDates"][varTime])
         print(thisYear)
         dictStations = {}
-        # writer = pd.ExcelWriter(dirname+'/weatherDataFor' + thisYear + '.xlsx', engine='xlsxwriter')
         for j in range(0, len(dfDict[thisYear])):
             stationAtThisYear = dfDict[thisYear][j]
             url = "https://www.ncei.noaa.gov/pub/data/uscrn/products/hourly02/" + thisYear + "/" + stationAtThisYear
@@ -60,11 +59,7 @@ def parserFun(inputData={}, dirname=''):
             dictNew = {}
             for col in dataFrameTemp.columns: dictNew[col] = dataFrameTemp.loc[:, col].values.tolist()
             dictStations[stationLabel] = dictNew
-            # new_df_file = pd.DataFrame(textLineArray, columns=columns)
-            # new_df_file.to_excel(writer, sheet_name=stationLabel)
-        # writer.save()
         dictAllData[thisYear] = dictStations
-        # if thisYear == '2018': dfWeaterData2018 = pd.read_excel(dirname+'/weatherDataFor2018.xlsx').drop(columns=['Unnamed: 0'])
     writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
     return dictAllData
 
@@ -95,16 +90,12 @@ def updateAndCleanUpDictionary(weatherDataDictObjectAll={}):
 def getCleanedDataStructure(inputData={}, dirname=''):
     ######################################################
     if inputData["parseDataBool"] == 0:
-        # dfWeaterData2018 = pd.read_excel(dirname + '/weatherDataFor2018.xlsx').drop(columns=['Unnamed: 0'])
         weatherDataDictObjectAll = json.loads(dirname + '/weatherDataJSONObject.json')
         print("Read in json object successfully")
     else:
         weatherDataDictObjectAll = parserFun(inputData=inputData, dirname=dirname)
         print("Successfully generated dictionary of all weather stations")
     ######################################################
-    # sheetNames2018      = getExcelSheetNames(file_path=dirname + "/weatherDataFor2018.xlsx")
-    # listOfDfsAllData    = [dfWeaterData2018]
-    # listOfSheetNamesAll = [sheetNames2018]
     print()
     print(weatherDataDictObjectAll.keys())
     print()
