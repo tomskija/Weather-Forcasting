@@ -4,22 +4,21 @@ from utils.utils import generateInputFileDict
 from os.path import dirname
 ##########################################################
 """
-Side project efforts:
-    1. Keep working on and cleaning up getCleanedDataStructure() and all its calls before going any further
-    2. Take all old Jupyter notebooks and place into a single project named like "Jupyter notebooks" and or
-        "Graduate School Jupyter Notebook Projects" such that people know its old skills/work.
+Current task efforts:
+    1. Keep working on and cleaning up and debugging getCleanedDataStructure() and all its calls before going any further
+    2. Once (1) is done and json is being saved or stored after parsing in correct formatted then can perform further data clean up
+    3. Once clean up all the array data, then can perform analysis
+    4. Then look into various ML methods or data analysis/interpolation techniques that can be used within project scope
 """
 ##########################################################
 def calculate(dirname=''):
-    # try:
-    inputData = generateInputFileDict()
-    weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
-    # once have it in the format wanted, then can perform further data clean up
-    # once clean up all the array data, then can perform analysis
+    try:
+        inputData = generateInputFileDict()
+        weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
+    except Exception as e:
+        print('\nError Message: ' + str(e) + '\n')
+        return str(e)
     return weatherDataDictObjectCleaned
-    # except Exception as e:
-    #     print(e)
-    #     return e
 
 ##########################################################
 if __name__ == '__main__':

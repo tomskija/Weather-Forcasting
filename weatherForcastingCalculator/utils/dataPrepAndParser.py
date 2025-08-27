@@ -11,10 +11,9 @@ warnings.filterwarnings("ignore")
 ##########################################################
 def parserFun(inputData={}, dirname=''):
     """
-    This function needs to be cleaned up. It does what it is meant to, but it is slow
-    and not built optimally. Plus, can probably use ascyio.gather() to run all possible
-    years (i.e., inputData["idealDates"]) in parallel
-    Also would like to get rid of hard coding variable columns below
+    This function needs to be cleaned up. It does what it is meant to at the moment, but it is slow
+    and not built optimally. Plus, can probably use ascyio.gather() to run all possible years (i.e.,
+    inputData["idealDates"]) in parallel. Also would like to get rid of hard coding variable columns below.
     """
     dfDict = {}
     for varTime in range(0, len(inputData["idealDates"])):
@@ -60,30 +59,50 @@ def parserFun(inputData={}, dirname=''):
             for col in dataFrameTemp.columns: dictNew[col] = dataFrameTemp.loc[:, col].values.tolist()
             dictStations[stationLabel] = dictNew
         dictAllData[thisYear] = dictStations
-    writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+    # Commenting this out for now as file is over 2GB in size when saved...
+    # additionally, json object is not being saved formatted correctly to open later
+    # writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+    print("Successfully generated dictionary of all weather stations and saved to JSON")
     return dictAllData
 
-##########################################################
 def updateAndCleanUpDictionary(weatherDataDictObjectAll={}):
-    """
-    This function needs to be more generic... get rid of any hard coding with dates
-    """
-    ##########################################################
-    unionList = list(set(list(weatherDataDictObjectAll['2018'].keys())).union(
-        set(list(weatherDataDictObjectAll['2019'].keys())),
-        set(list(weatherDataDictObjectAll['2020'].keys())),
-        set(list(weatherDataDictObjectAll['2021'].keys())),
-        set(list(weatherDataDictObjectAll['2022'].keys()))
-    ))
+    ''' Hard Coded Version'''
+    # print("BEFORE")
+    # print(len(list(weatherDataDictObjectAll['2018'].keys())))
+    # unionList = list(set(list(weatherDataDictObjectAll['2018'].keys())).union(
+    #     set(list(weatherDataDictObjectAll['2019'].keys())),
+    #     set(list(weatherDataDictObjectAll['2020'].keys())),
+    #     set(list(weatherDataDictObjectAll['2021'].keys())),
+    #     set(list(weatherDataDictObjectAll['2022'].keys()))
+    # ))
+    # weatherDataDictObjectAll['2018'] = {key: value for key, value in weatherDataDictObjectAll['2018'].items() if key in unionList}
+    # weatherDataDictObjectAll['2019'] = {key: value for key, value in weatherDataDictObjectAll['2019'].items() if key in unionList}
+    # weatherDataDictObjectAll['2020'] = {key: value for key, value in weatherDataDictObjectAll['2020'].items() if key in unionList}
+    # weatherDataDictObjectAll['2021'] = {key: value for key, value in weatherDataDictObjectAll['2021'].items() if key in unionList}
+    # weatherDataDictObjectAll['2022'] = {key: value for key, value in weatherDataDictObjectAll['2022'].items() if key in unionList}
+    # print("AFTER")
+    # print(len(list(weatherDataDictObjectAll['2018'].keys())))
+    ''' Generic Coded Version'''
+    print(weatherDataDictObjectAll.keys())
     print("BEFORE")
     print(len(list(weatherDataDictObjectAll['2018'].keys())))
-    weatherDataDictObjectAll['2018'] = {key: value for key, value in weatherDataDictObjectAll['2018'].items() if key in unionList}
-    weatherDataDictObjectAll['2019'] = {key: value for key, value in weatherDataDictObjectAll['2019'].items() if key in unionList}
-    weatherDataDictObjectAll['2020'] = {key: value for key, value in weatherDataDictObjectAll['2020'].items() if key in unionList}
-    weatherDataDictObjectAll['2021'] = {key: value for key, value in weatherDataDictObjectAll['2021'].items() if key in unionList}
-    weatherDataDictObjectAll['2022'] = {key: value for key, value in weatherDataDictObjectAll['2022'].items() if key in unionList}
+    # Get all keys from all nested dictionaries and create union
+    ListOfAllkeys = []
+    for nested_dict in weatherDataDictObjectAll.values():
+        if isinstance(nested_dict, dict):
+            ListOfAllkeys.extend(nested_dict.keys())
+    unionList = list(set(ListOfAllkeys))
+    print('len(ListOfAllkeys): ', len(ListOfAllkeys))
+    print(ListOfAllkeys[:10])
+    print('len(unionList):     ', len(unionList))
+    print(unionList[:10])
+    # Filter each nested dictionary to only contain keys in the union
+    for key, nested_dict in weatherDataDictObjectAll.items():
+        if isinstance(nested_dict, dict):
+            weatherDataDictObjectAll[key] = {k: v for k, v in nested_dict.items() if k in unionList}
     print("AFTER")
     print(len(list(weatherDataDictObjectAll['2018'].keys())))
+    print(weatherDataDictObjectAll.keys())
     return weatherDataDictObjectAll
 
 ##########################################################
@@ -91,26 +110,12 @@ def getCleanedDataStructure(inputData={}, dirname=''):
     ######################################################
     if inputData["parseDataBool"] == 0:
         weatherDataDictObjectAll = json.loads(dirname + '/weatherDataJSONObject.json')
-        print("Read in json object successfully")
     else:
         weatherDataDictObjectAll = parserFun(inputData=inputData, dirname=dirname)
-        print("Successfully generated dictionary of all weather stations")
     ######################################################
-    print()
-    print(weatherDataDictObjectAll.keys())
-    print()
-    f
-    ######################################################
+    # Once below function is debugged, place this in the parsing function above prior to saving final dictionary to a json
     weatherDataDictObjectCleaned = updateAndCleanUpDictionary(weatherDataDictObjectAll=weatherDataDictObjectAll)
-    print(weatherDataDictObjectCleaned.keys())
     ######################################################
     return weatherDataDictObjectCleaned
-
-##########################################################
-# def getExcelSheetNames(file_path='):
-#     sheets = []
-#     with zipfile.ZipFile(file_path, 'r') as zip_ref: xml = zip_ref.read("xl/workbook.xml").decode("utf-8")
-#     for s_tag in  re.findall("<sheet [^>]*", xml):sheets.append(re.search('name="[^"]*', s_tag).group(0)[6:])
-#     return sheets
 
 ##########################################################

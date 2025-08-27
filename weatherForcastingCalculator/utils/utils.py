@@ -16,7 +16,8 @@ def generateInputFileDict():
     inputData = {}
     inputData["parseDataBool"] = [0, 1][parseBoolean]
     if inputData["parseDataBool"] == 1:
-        inputData["idealDates"] = [2018, 2019]# [2018, 2019, 2020, 2021, 2022] # user specify years
+        # inputData["idealDates"] = [2018] # user specify years
+        inputData["idealDates"] = [2018, 2019, 2020, 2021, 2022] # user specify years
     return inputData
 
 ##########################################################
