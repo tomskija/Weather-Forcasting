@@ -1,6 +1,6 @@
 # Weather Forecasting Calculator
 
-A Python-based weather forecasting application with containerized development and production environments.
+A comprehensive Python-based weather forecasting application with containerized development and production environments, featuring optional database integration and modern DevOps practices.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
@@ -11,6 +11,7 @@ A Python-based weather forecasting application with containerized development an
 - [Project Structure](#project-structure)
 - [Testing](#testing)
 - [Contributing](#contributing)
+- [API Documentation](#api-documentation)
 - [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
@@ -33,13 +34,17 @@ A Python-based weather forecasting application with containerized development an
 
 ### Core Python Dependencies
 The project includes these main libraries (automatically installed):
-- **numpy** (1.24.3) - Numerical computing
+- **numpy** (1.24.3) - Numerical computing and array operations
 - **pandas** (2.0.3) - Data manipulation and analysis
 - **matplotlib** (3.7.2) - Plotting and visualization
 - **seaborn** (0.12.2) - Statistical data visualization
 - **scikit-learn** (1.3.0) - Machine learning library
 - **beautifulsoup4** (4.12.2) - Web scraping and HTML parsing
 - **requests** (2.31.0) - HTTP library for API calls
+- **aiohttp** (3.8.5) - Async HTTP client/server framework
+- **fastapi** (0.101.1) - Modern web framework for APIs
+- **metpy** (1.5.1) - Weather data analysis tools
+- **xarray** (2023.7.0) - N-dimensional data arrays
 
 ### Optional Database Dependencies
 If using database features, these will be installed:
@@ -59,7 +64,7 @@ If using database features, these will be installed:
 1. **Clone the repository**
    ```bash
    git clone git@github.com:tomskija/Weather-Forcasting.git
-   cd Weather-Forcasting
+   cd WEATHER-FORCASTING
    ```
 
 2. **Open in VS Code**
@@ -83,36 +88,48 @@ If using database features, these will be installed:
    python weatherForcastingCalculator/Calculator.py
    ```
 
-### Option 2: Local Development with Docker Compose
+### Option 2: Docker Compose Development
 
-1. **Clone the repository**
-   ```bash
-   git clone git@github.com:tomskija/Weather-Forcasting.git
-   cd Weather-Forcasting
-   ```
+#### Simple File-Based Development
+```bash
+# Clone the repository
+git clone git@github.com:tomskija/Weather-Forcasting.git
+cd Weather-Forcasting
 
-2. **Start Development Environment (File-based)**
-   ```bash
-   docker-compose up weather-app-dev
-   ```
+# Start development environment (file-based only)
+docker-compose up weather-app-dev
 
-3. **Start Development Environment (With Database)**
-   ```bash
-   # Include PostgreSQL database
-   docker-compose up postgres weather-app-dev
-   ```
+# Access the container
+docker-compose exec weather-app-dev bash
+```
 
-4. **Access the container**
-   ```bash
-   docker-compose exec weather-app-dev bash
-   ```
+#### Development with Database (Optional)
+```bash
+# Start with full database stack
+docker-compose --profile database up weather-app-dev-db
+
+# Or start individual services
+docker-compose up postgres redis weather-app-dev
+```
+
+#### Production Deployment via Docker Compose
+```bash
+# Simple production (file-based)
+docker-compose up weather-app
+
+# Production with database
+docker-compose --profile database up weather-app-db
+
+# Full stack deployment
+docker-compose --profile full up
+```
 
 ### Option 3: Traditional Python Setup
 
 1. **Install Python 3.11**
    - [Download from python.org](https://www.python.org/downloads/)
 
-2. **Clone and Setup**
+2. **Clone and Setup Virtual Environment**
    ```bash
    git clone git@github.com:tomskija/Weather-Forcasting.git
    cd Weather-Forcasting
@@ -122,16 +139,52 @@ If using database features, these will be installed:
    pip install -r requirements.txt
    ```
 
-3. **Optional: Enable Database Features**
+3. **Configure Environment Variables**
    ```bash
-   # If you want database support, uncomment database lines in requirements.txt and reinstall:
+   cp .env.example .env
+   # Edit .env with your API keys and preferences
+   ```
+
+4. **Optional: Enable Database Features**
+   ```bash
+   # Uncomment database dependencies in requirements.txt, then:
    pip install -r requirements.txt
    ```
 
-4. **Run the Application**
+5. **Run the Application**
    ```bash
    python weatherForcastingCalculator/Calculator.py
    ```
+
+## Advanced Usage
+
+### Environment Profiles
+The application supports multiple environment profiles via Docker Compose:
+
+```bash
+# Default (no profile) - Basic file-based services
+docker-compose up
+
+# Database profile - Includes PostgreSQL, Redis, pgAdmin
+docker-compose --profile database up
+
+# Full profile - All services including monitoring
+docker-compose --profile full up
+```
+
+### Service Variants
+| Service | Port | Purpose | Database |
+|---------|------|---------|----------|
+| `weather-app` | 8000 | Production (file-based) | ❌ |
+| `weather-app-db` | 8001 | Production (with database) | ✅ |
+| `weather-app-dev` | 8002 | Development (file-based) | ❌ |
+| `weather-app-dev-db` | 8003 | Development (with database) | ✅ |
+
+### API Access
+When running, the application provides:
+- **Main API**: http://localhost:8000 (or respective port)
+- **Database Admin**: http://localhost:5050 (pgAdmin)
+- **Health Check**: http://localhost:8000/health
 
 ## Development Setup
 
@@ -144,30 +197,43 @@ If using database features, these will be installed:
 
 2. **Edit `.env` with your values**
    ```bash
-   # Open .env and configure:
+   # Application settings
    ENV=development
    DEBUG=true
    PORT=8000
    
+   # Weather API Keys (get from respective providers)
+   OPENWEATHER_API_KEY=your_openweathermap_api_key_here
+   WEATHER_API_KEY=your_weatherapi_key_here
+   
    # Database (optional - only if using database features)
-   # DATABASE_URL=postgresql://weather_user:weather_pass@localhost:5432/weather_forecast_db
+   DATABASE_URL=postgresql://weather_user:weather_pass@localhost:5432/weather_forecast_db
+   REDIS_URL=redis://localhost:6379/0
+   
+   # Machine Learning Settings
+   MODEL_TRAINING_INTERVAL_HOURS=24
+   PREDICTION_WINDOW_DAYS=7
    ```
 
 ### VS Code Dev Container Features
 
 The dev container automatically provides:
-- Python 3.11 with all dependencies
-- Pre-configured VS Code extensions
-- Debugging capabilities
-- Port forwarding (8000, 5000)
-- Git integration
+- Python 3.11 with all dependencies pre-installed
+- Pre-configured VS Code extensions for Python, Docker, and Jupyter
+- Code formatting (Black) and linting (flake8) on save
+- Debugging capabilities with breakpoint support
+- Port forwarding (8000, 5000, 8888 for Jupyter)
+- Git integration with SSH key forwarding
 - Non-root user setup for security
+- Automatic environment variable loading
 
-### Making Changes
+### Development Workflow
 
 1. **Code changes** are automatically synced between host and container
-2. **Dependencies**: Add to `requirements.txt` and rebuild container
+2. **Dependencies**: Add to `requirements.txt` and rebuild container  
 3. **Container changes**: Modify `.devcontainer/devcontainer.json`
+4. **Database changes**: Update SQL scripts in `sql/` directory
+5. **Testing**: Run `pytest` directly in the container terminal
 
 ## Database Setup (Optional)
 
@@ -209,13 +275,13 @@ The project includes optional database support for advanced weather data storage
    pip install psycopg2-binary==2.9.7 SQLAlchemy==2.0.21 alembic==1.12.0 redis==5.0.1
    ```
 
-2. **Start with Database Services**
+2. **Start Database Services**
    ```bash
-   # Start PostgreSQL, Redis, and your app
-   docker-compose up postgres redis weather-app
+   # Using Docker Compose profiles
+   docker-compose --profile database up
    
-   # For development with database
-   docker-compose up postgres redis weather-app-dev
+   # Or start specific services
+   docker-compose up postgres redis pgadmin
    ```
 
 3. **Access Database Tools**
@@ -227,13 +293,25 @@ The project includes optional database support for advanced weather data storage
      - Database: weather_forecast_db
      - User: weather_user
      - Password: weather_pass
+   - **Redis**: localhost:6379
 
 4. **Database Features Available**
    - Pre-built schema with weather stations, historical data, forecasts
-   - Sample data for 8 US cities
-   - Common queries for weather analysis
-   - User preference management
-   - Weather alerts system
+   - Sample data for 8 US cities with realistic weather patterns
+   - Common queries for weather analysis and reporting
+   - User preference management system
+   - Weather alerts and notification system
+   - Forecast accuracy tracking and model performance metrics
+
+### Database Schema Overview
+
+The database includes these main tables:
+- `weather_stations` - Global weather station registry
+- `weather_data` - Historical weather observations
+- `weather_forecasts` - Prediction data with confidence scores
+- `forecast_accuracy` - Model performance tracking
+- `weather_alerts` - Alert and notification management
+- `user_preferences` - Multi-user configuration support
 
 ### File-Only Setup (No Database)
 
@@ -254,21 +332,50 @@ Your application will work with file-based data in the `weatherForcastingCalcula
 ### Simple Production (File-based)
 
 ```bash
-# Build production image
+# Build and run production image
 docker build -t weather-app .
-
-# Run production container
 docker run -p 8000:8000 weather-app
 ```
 
-### Production with Database
+### Production with Docker Compose
 
 ```bash
+# File-based production deployment
+docker-compose up weather-app
+
 # Full production stack with database
-docker-compose up postgres redis weather-app
+docker-compose --profile database up weather-app-db
 
 # Background deployment
-docker-compose up -d postgres redis weather-app
+docker-compose --profile database up -d weather-app-db
+```
+
+### Kubernetes Deployment (Advanced)
+
+```yaml
+# Example Kubernetes deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: weather-app
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    spec:
+      containers:
+      - name: weather-app
+        image: ghcr.io/tomskija/weather-forcasting:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENV
+          value: "production"
 ```
 
 ### Using Docker Compose
@@ -322,52 +429,233 @@ WEATHER-FORCASTING/
 └── requirements.txt     # Python dependencies
 ```
 
+### Key Directories Explained
+
+**`weatherForcastingCalculator/`** - Core application logic
+- `Calculator.py` - Main weather calculation engine
+- `utils/` - Helper functions for data processing
+- `Data/` - Local weather data files (CSV, JSON formats)
+
+**`.devcontainer/`** - Development environment configuration  
+- Enables instant development setup with VS Code
+- Pre-configured with Python, extensions, and debugging
+
+**`sql/`** - Database infrastructure (optional)
+- Complete schema for weather data storage
+- Sample data for testing and development
+- Optimized queries for common operations
+
+**`tests/`** - Automated testing suite
+- Unit tests with pytest framework  
+- Coverage reporting and quality metrics
+- Integration tests for database operations
+
 ## Testing
 
-### Run Tests in Dev Container
+### Running Tests in Development Container
 
 ```bash
-# In VS Code dev container terminal
+# Run all tests with verbose output
 pytest tests/ -v
-```
 
-### Run Tests with Coverage
-
-```bash
+# Run with coverage reporting  
 pytest tests/ --cov=weatherForcastingCalculator --cov-report=html
+
+# Run specific test categories
+pytest tests/ -k "test_data" -v          # Data processing tests
+pytest tests/ -k "test_model" -v         # ML model tests  
+pytest tests/ -k "test_api" -v           # API endpoint tests
 ```
 
-### Run Tests Locally
+### Local Testing (Traditional Python)
 
 ```bash
 # Install test dependencies
-pip install pytest pytest-cov
+pip install pytest pytest-cov flake8 black
 
 # Run tests
 pytest tests/
+
+# Run with coverage
+pytest --cov=weatherForcastingCalculator --cov-report=term-missing
+
+# Code quality checks
+flake8 weatherForcastingCalculator/
+black --check weatherForcastingCalculator/
 ```
+
+### Test Categories
+
+The test suite covers:
+
+**Unit Tests** (`test_calculator.py`)
+- Core weather calculation functions
+- Data validation and processing
+- Error handling and edge cases
+
+**Integration Tests** (when database enabled)
+- Database connection and queries
+- API endpoint functionality  
+- File I/O operations
+
+**Performance Tests**
+- Large dataset processing
+- Model prediction speed
+- API response times
+
+### Continuous Testing
+
+Tests automatically run on:
+- Every commit push
+- Pull request creation
+- Scheduled runs (daily)
+- Before production deployments
+
+Coverage reports are generated and can be viewed in the `htmlcov/` directory after running tests.
 
 ## Contributing
 
-1. **Fork the repository**
-2. **Create a feature branch**
+We welcome contributions! Please follow these guidelines:
+
+### Development Workflow
+
+1. **Fork and Clone**
+   ```bash
+   git clone git@github.com:YOUR-USERNAME/Weather-Forcasting.git
+   cd Weather-Forcasting
+   ```
+
+2. **Create Feature Branch**
    ```bash
    git checkout -b feature/your-feature-name
    ```
-3. **Make changes in dev container**
-4. **Add tests** for new functionality
-5. **Commit changes**
-   ```bash
-   git commit -m "Add: your feature description"
-   ```
-6. **Push and create pull request**
 
-### Code Quality
+3. **Set Up Development Environment**
+   ```bash
+   # Option 1: Use Dev Container (Recommended)
+   code .  # Open in VS Code, then reopen in container
+   
+   # Option 2: Local Setup
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+4. **Make Changes**
+   - Write your code following existing patterns
+   - Add tests for new functionality
+   - Update documentation as needed
+
+5. **Test Your Changes**
+   ```bash
+   # Run tests
+   pytest tests/ -v
+   
+   # Check code quality
+   flake8 weatherForcastingCalculator/
+   black weatherForcastingCalculator/
+   
+   # Test different configurations
+   docker-compose up weather-app-dev  # Test file-based mode
+   docker-compose --profile database up weather-app-dev-db  # Test with database
+   ```
+
+6. **Commit and Push**
+   ```bash
+   git add .
+   git commit -m "feat: add weather prediction feature"  # Use conventional commits
+   git push origin feature/your-feature-name
+   ```
+
+7. **Create Pull Request**
+   - Provide clear description of changes
+   - Reference any related issues
+   - Ensure all CI checks pass
+
+### Code Quality Standards
 
 The project enforces:
-- **Linting**: flake8
-- **Testing**: pytest with coverage
-- **Formatting**: black (auto-applied in dev container)
+- **Linting**: flake8 for code standards
+- **Formatting**: black for consistent code style  
+- **Testing**: pytest with minimum 80% coverage
+- **Documentation**: Clear docstrings and comments
+- **Type Hints**: Use Python type annotations where applicable
+
+### Commit Convention
+
+We use [Conventional Commits](https://conventionalcommits.org/):
+- `feat:` - New features
+- `fix:` - Bug fixes  
+- `docs:` - Documentation updates
+- `style:` - Code formatting changes
+- `refactor:` - Code refactoring
+- `test:` - Test additions or updates
+- `chore:` - Build process or auxiliary tool changes
+
+## API Documentation
+
+### Weather Endpoints
+
+When running the application, the following endpoints are available:
+
+```bash
+# Health check
+GET /health
+
+# Current weather data
+GET /weather/current?location={city_name}
+
+# Weather forecast  
+GET /weather/forecast?location={city_name}&days={1-7}
+
+# Historical weather data
+GET /weather/history?location={city_name}&date={YYYY-MM-DD}
+
+# Weather alerts
+GET /weather/alerts?location={city_name}
+```
+
+### Example API Usage
+
+```python
+import requests
+
+# Get current weather
+response = requests.get('http://localhost:8000/weather/current?location=New York')
+weather_data = response.json()
+
+# Get 5-day forecast
+forecast = requests.get('http://localhost:8000/weather/forecast?location=New York&days=5')
+forecast_data = forecast.json()
+```
+
+### Response Format
+
+```json
+{
+  "location": {
+    "city": "New York",
+    "country": "US",
+    "coordinates": [40.7128, -74.0060]
+  },
+  "current": {
+    "temperature": 22.5,
+    "humidity": 65,
+    "pressure": 1013.25,
+    "wind_speed": 3.2,
+    "conditions": "partly cloudy"
+  },
+  "forecast": [
+    {
+      "date": "2025-08-29",
+      "high": 26,
+      "low": 18,
+      "conditions": "sunny",
+      "precipitation_chance": 10
+    }
+  ]
+}
+```
 
 ## Troubleshooting
 
