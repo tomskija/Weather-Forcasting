@@ -124,9 +124,10 @@ async def processYearData(inputData={}, session='', year=''):
     print(f"Processing {len(stationFiles)} stations for year {year}")
     # Now process all stations for this year in parallel given a batch size
     yearData = {}
-    for i in range(0, len(stationFiles), inputData["batchSize"]):
-        batch = stationFiles[i:i + inputData["batchSize"]]
-        print(f"Processing batch {i//inputData["batchSize"] + 1} for year {year} ({len(batch)} stations)") 
+    batchSizeVal = inputData["batchSize"]
+    for i in range(0, len(stationFiles), batchSizeVal):
+        batch = stationFiles[i:i + batchSizeVal]
+        print(f"Processing batch {i//batchSizeVal + 1} for year {year} ({len(batch)} stations)") 
         # Create tasks for this batch
         tasks = [processStationData(session, year, stationFile) for stationFile in batch]
         # Wait for batch to complete
@@ -143,20 +144,32 @@ async def processYearData(inputData={}, session='', year=''):
                 successfulCount += 1
             else:
                 print(f"Failed to process station {batch[j]} in year {year}")
-        print(f"Batch {i//inputData["batchSize"] + 1} completed: {successfulCount}/{len(batch)} successful")
-        # await asyncio.sleep(0.1) # Add small delay between batches to be nice to the server
+        print(f"Batch {i//batchSizeVal + 1} completed: {successfulCount}/{len(batch)} successful")
+        await asyncio.sleep(0.1)
     print(f"Completed processing year {year}: {len(yearData)} stations successfully processed")
     return yearData
 
 ##########################################################
-async def parserFunParallelized(inputData={}, dirname=''):
+async def parserFunParallelized(inputData={}, dirname='', writeJson=False):
     """
         *** Call all modular functions and begin putting all stations for a given year into dictionary format for later use
     """
     years = [str(year) for year in inputData["idealDates"]]
+    # Create aiohttp session with connection limits and longer timeout
+    connector = aiohttp.TCPConnector(
+        limit=20,           # Increased total connection limit
+        limit_per_host=10,  # Increased per-host limit
+        ttl_dns_cache=300,  # DNS cache TTL
+        use_dns_cache=True,
+    )
+    timeout = aiohttp.ClientTimeout(
+        total=600,          # 10 minute total timeout
+        sock_read=180,      # 3 minute read timeout
+        sock_connect=30     # 30 second connect timeout
+    )
     # Create aiohttp session with connection limits
-    connector = aiohttp.TCPConnector(limit=10, limit_per_host=5)
-    timeout   = aiohttp.ClientTimeout(total=300)  # 5 minute timeout
+    # connector = aiohttp.TCPConnector(limit=10, limit_per_host=5)
+    # timeout   = aiohttp.ClientTimeout(total=300)  # 5 minute timeout
     async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
         # Process all years in parallel
         tasks = [processYearData(inputData=inputData, session=session, year=year) for year in years]
@@ -167,12 +180,13 @@ async def parserFunParallelized(inputData={}, dirname=''):
     # Make sure all yearly stations are the same
     dictAllData = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
     # Save to JSON if dirname provided
-    writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+    if writeJson == True:
+        writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
     print("Successfully generated dictionary of all weather stations")
     return dictAllData
 
 ##########################################################
-def parserFunSlowAndInSeries(inputData={}, dirname=''):
+def parserFunSlowAndInSeries(inputData={}, dirname='', writeJson=False):
     dfDict = {}
     for varTime in range(0, len(inputData["idealDates"])):
         url = "https://www.ncei.noaa.gov/pub/data/uscrn/products/hourly02/" + str(inputData["idealDates"][varTime]) + "/"
@@ -224,8 +238,9 @@ def parserFunSlowAndInSeries(inputData={}, dirname=''):
             dictStations[stationLabel] = dictNew
         dictAllData[thisYear] = dictStations
     dictAllData = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
-    writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
-    print("Successfully generated dictionary of all weather stations and saved to JSON")
+    if writeJson == True:
+        writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+    print("Successfully generated dictionary of all weather stations")
     return dictAllData
     
 ##########################################################
@@ -235,10 +250,10 @@ async def getCleanedDataStructure(inputData={}, dirname=''):
         with open(dirname + '/weatherDataJSONObject.json', 'r') as f:
             weatherDataDictObjectAll = json.load(f)
     else:
-        if inputData["booleanRunSeriesVsParallel"] == 1: # parserFunSlowAndInSeries took apx 800 seconds to complete
-            weatherDataDictObjectAll = parserFunSlowAndInSeries(inputData=inputData, dirname=dirname)
-        elif inputData["booleanRunSeriesVsParallel"] == 0: # parserFunParallelized    took apx 400 seconds to complete
-            weatherDataDictObjectAll = await parserFunParallelized(inputData=inputData, dirname=dirname)
+        if inputData["booleanRunSeriesVsParallel"] == 1: # parserFunSlowAndInSeries took apx 700 seconds to complete
+            weatherDataDictObjectAll = parserFunSlowAndInSeries(inputData=inputData, dirname=dirname, writeJson=False)
+        elif inputData["booleanRunSeriesVsParallel"] == 0: # parserFunParallelized    took apx 500 seconds to complete
+            weatherDataDictObjectAll = await parserFunParallelized(inputData=inputData, dirname=dirname, writeJson=False)
     ######################################################
     return weatherDataDictObjectAll
 

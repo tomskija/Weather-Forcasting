@@ -87,8 +87,8 @@ If using database features, these will be installed:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd WEATHER-FORCASTING
+   git clone git@github.com:tomskija/Weather-Forcasting.git
+   cd Weather-Forcasting
    ```
 
 2. **Start Development Environment (File-based)**
@@ -114,8 +114,8 @@ If using database features, these will be installed:
 
 2. **Clone and Setup**
    ```bash
-   git clone <your-repo-url>
-   cd WEATHER-FORCASTING
+   git clone git@github.com:tomskija/Weather-Forcasting.git
+   cd Weather-Forcasting
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install --upgrade pip

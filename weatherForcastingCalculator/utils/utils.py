@@ -16,7 +16,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 ##########################################################
 def writeToJson(data="", outFileName=''):
-    # 1.3GB atm with parallized vs. 2GB... so something wrong with parallel parser
     jsonOut = json.dumps(data, cls=NumpyEncoder) # indent=2, ensure_ascii=False, sort_keys=True)
     file1 = open(outFileName, "w")
     file1.write(jsonOut)
@@ -28,11 +27,11 @@ def generateInputFileDict():
     # for later, can create a sandox.py for inputs to map
     inputData = {}
     inputData["booleanRunSeriesVsParallel"] = 0
-    inputData["parseDataBool"] = [0, 1][1]
+    inputData["parseDataBool"] = [0, 1][0]
     if inputData["parseDataBool"] == 1:
         inputData["idealDates"] = [2018, 2019, 2020, 2021, 2022] # user specify years
         if inputData["booleanRunSeriesVsParallel"] == 0:
-            inputData["batchSize"] = 10
+            inputData["batchSize"] = 20
     return inputData
 
 ##########################################################
