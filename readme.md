@@ -58,8 +58,8 @@ If using database features, these will be installed:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd WEATHER-FORCASTING
+   git clone git@github.com:tomskija/Weather-Forcasting.git
+   cd Weather-Forcasting
    ```
 
 2. **Open in VS Code**

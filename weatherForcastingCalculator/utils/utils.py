@@ -31,6 +31,8 @@ def generateInputFileDict():
     inputData["parseDataBool"] = [0, 1][1]
     if inputData["parseDataBool"] == 1:
         inputData["idealDates"] = [2018, 2019, 2020, 2021, 2022] # user specify years
+        if inputData["booleanRunSeriesVsParallel"] == 0:
+            inputData["batchSize"] = 10
     return inputData
 
 ##########################################################
