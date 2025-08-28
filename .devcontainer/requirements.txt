@@ -3,3 +3,18 @@ pandas
 matplotlib
 seaborn
 scikit-learn
+bs4
+
+# Database
+psycopg2-binary==2.9.7
+SQLAlchemy==2.0.21
+alembic==1.12.0
+
+# Caching
+redis==5.0.1
+
+# Environment management
+python-dotenv==1.0.0
+
+# Database connection pooling
+psycopg2-pool==1.1

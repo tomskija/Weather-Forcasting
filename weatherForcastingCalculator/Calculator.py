@@ -1,4 +1,6 @@
 ##########################################################
+import time
+import numpy as np
 from utils.dataPrepAndParser import getCleanedDataStructure
 from utils.utils import generateInputFileDict
 from os.path import dirname
@@ -21,17 +23,20 @@ Backend Python Efforts for Project:
 """
 ##########################################################
 def calculate(dirname=''):
-    try:
-        inputData = generateInputFileDict()
-        weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
-    except Exception as e:
-        print('\nError Message: ' + str(e) + '\n')
-        return str(e)
+    # try:
+    inputData = generateInputFileDict()
+    startTime = time.time()
+    weatherDataDictObjectCleaned = getCleanedDataStructure(inputData=inputData, dirname=dirname)
+    endTime = time.time()
+    print("The total numerical time to parse data is " + str(np.round(endTime - startTime, 5)) + " seconds")
+    print("Completed Calculation")
+    # except Exception as e:
+    #     print('\nError Message: ' + str(e) + '\n')
+    #     return str(e)
     return weatherDataDictObjectCleaned
 
 ##########################################################
 if __name__ == '__main__':
     ######################################################
     weatherDataDictObjectCleaned = calculate(dirname=dirname(__file__) + '/Data')
-    print("Completed Calculation")
     ######################################################
