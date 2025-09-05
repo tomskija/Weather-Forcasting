@@ -247,9 +247,8 @@ def parserFunSlowAndInSeries(inputData={}, dirname='', writeJson=False):
 async def getCleanedDataStructure(inputData={}, dirname=''):
     ######################################################
     if inputData["parseDataBool"] == 0:
-        # with open(dirname + '/weatherDataJSONObject.json', 'r') as f:
-        #     weatherDataDictObjectAll = json.load(f)
-        with open(dirname + '/weatherDataJSONObject2018.json', 'r') as f:
+        fileName = ['weatherDataJSONObject2018.json', 'weatherDataJSONObject.json'][0]
+        with open(dirname + fileName, 'r') as f:
             weatherDataDictObjectAll = json.load(f)
     else:
         if inputData["booleanRunSeriesVsParallel"] == 1: # parserFunSlowAndInSeries took apx 700 seconds to complete
@@ -257,7 +256,8 @@ async def getCleanedDataStructure(inputData={}, dirname=''):
         elif inputData["booleanRunSeriesVsParallel"] == 0: # parserFunParallelized    took apx 500 seconds to complete
             weatherDataDictObjectAll = await parserFunParallelized(inputData=inputData, dirname=dirname, writeJson=False)
     ######################################################
-    print(weatherDataDictObjectAll.keys())
+    # print(weatherDataDictObjectAll.keys())
+    ######################################################
     return weatherDataDictObjectAll
 
 ##########################################################
