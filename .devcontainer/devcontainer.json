@@ -11,13 +11,10 @@
         "ms-python.pylint",
         "ms-python.black-formatter",
         "ms-python.isort",
-        "ms-toolsai.jupyter",
         "ms-python.flake8",
-        "wholroyd.jinja",
         "ms-vscode.vscode-json",
         "redhat.vscode-yaml",
-        "streetsidesoftware.code-spell-checker",
-        "ms-vscode-remote.remote-containers"
+        "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
@@ -26,7 +23,7 @@
         "python.linting.pylintEnabled": true,
         "python.linting.flake8Enabled": true,
         "editor.formatOnSave": true,
-        "jupyter.askForKernelRestart": false,
+        "python.terminal.activateEnvironment": false,
         "files.associations": {
           "*.yml": "yaml",
           "*.yaml": "yaml"
@@ -34,11 +31,22 @@
       }
     }
   },
-  "forwardPorts": [8000, 5000, 8888],
-  "postCreateCommand": "pip install -r requirements.txt && echo 'Dev container setup complete!'",
+  "forwardPorts": [8000, 5000],
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt && echo 'Dev container setup complete!'",
   "remoteUser": "developer",
   "workspaceFolder": "/workspace",
   "mounts": [
     "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
-  ]
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": true,
+      "version": "latest"
+    }
+  }
 }

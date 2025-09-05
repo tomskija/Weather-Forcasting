@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -13,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     sudo \
     build-essential \
+    pkg-config \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create workspace directory
@@ -34,12 +37,32 @@ USER developer
 # Set the default shell
 SHELL ["/bin/bash", "-c"]
 
-# Install common Python development tools
+# Install Python tools
 RUN pip install --user --upgrade pip setuptools wheel
 
-# Set Python path
+# Pre-install common dependencies for faster container startup
+RUN pip install --user \
+    numpy \
+    pandas \
+    matplotlib \
+    seaborn \
+    scikit-learn \
+    requests \
+    fastapi \
+    uvicorn \
+    pytest \
+    black \
+    flake8 \
+    isort
+
+# Set Python path and PATH
 ENV PYTHONPATH=/workspace
 ENV PATH="/home/developer/.local/bin:${PATH}"
 
 # Set the working directory
 WORKDIR /workspace
+
+# Create common directories
+RUN mkdir -p /workspace/weatherForcastingCalculator/Data \
+    && mkdir -p /workspace/tests \
+    && mkdir -p /workspace/logs
