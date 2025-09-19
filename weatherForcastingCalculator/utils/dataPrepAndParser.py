@@ -8,7 +8,30 @@ import aiohttp
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from utils.utils import writeToJson
+from utils.dataCleaning import cleanData
 warnings.filterwarnings("ignore")
+
+##########################################################
+def verticallyStackObjectsInDict(dictAllData={}):
+    ######################################################
+    # Stack all years vertically by weather station
+    stackedWeatherData = {}
+    years = list(dictAllData.keys())
+    weather_stations = list(dictAllData[years[0]].keys())
+    ######################################################
+    for station in weather_stations:
+        stackedWeatherData[station] = {}
+        measurement_keys = dictAllData[years[0]][station].keys()
+        for measurement in measurement_keys:
+            yearly_data = []
+            for year in years:
+                if year in dictAllData and station in dictAllData[year]:
+                    yearly_data.append(dictAllData[year][station][measurement])
+            # Stack vertically (concatenate arrays)
+            stackedWeatherData[station][measurement] = np.concatenate(yearly_data)
+    ######################################################
+    return stackedWeatherData
+    ######################################################
 
 ##########################################################
 def updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll={}):
@@ -168,8 +191,6 @@ async def parserFunParallelized(inputData={}, dirname='', writeJson=False):
         sock_connect=30     # 30 second connect timeout
     )
     # Create aiohttp session with connection limits
-    # connector = aiohttp.TCPConnector(limit=10, limit_per_host=5)
-    # timeout   = aiohttp.ClientTimeout(total=300)  # 5 minute timeout
     async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
         # Process all years in parallel
         tasks = [processYearData(inputData=inputData, session=session, year=year) for year in years]
@@ -178,12 +199,16 @@ async def parserFunParallelized(inputData={}, dirname='', writeJson=False):
         dictAllData = {}
         for i, result in enumerate(yearResults): dictAllData[years[i]] = result
     # Make sure all yearly stations are the same
-    dictAllData = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
+    weatherDataDictObjectAll = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
+    # Clean up dictionary format and vertically stack all years into one array per weather station
+    weatherDataDictObjectAll = verticallyStackObjectsInDict(dictAllData=dictAllData)
+    # Clean the data
+    weatherDataDictObjectAll, dfStations = cleanData(weatherDataDictObjectAll=weatherDataDictObjectAll, dirname=dirname)
     # Save to JSON if dirname provided
     if writeJson == True:
-        writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+        writeToJson(data=dictAllData, outFileName=dirname+'/Data/weatherDataJSONObject.json')
     print("Successfully generated dictionary of all weather stations")
-    return dictAllData
+    return weatherDataDictObjectAll, dfStations
 
 ##########################################################
 def parserFunSlowAndInSeries(inputData={}, dirname='', writeJson=False):
@@ -237,27 +262,32 @@ def parserFunSlowAndInSeries(inputData={}, dirname='', writeJson=False):
             for col in dataFrameTemp.columns: dictNew[col] = dataFrameTemp.loc[:, col].values.tolist()
             dictStations[stationLabel] = dictNew
         dictAllData[thisYear] = dictStations
-    dictAllData = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
+    # Make sure all yearly stations are the same
+    weatherDataDictObjectAll = updateAndCleanUpDictionaryWithStats(weatherDataDictObjectAll=dictAllData)
+    # Clean up dictionary format and vertically stack all years into one array per weather station
+    weatherDataDictObjectAll = verticallyStackObjectsInDict(dictAllData=dictAllData)
+    # Clean the data
+    weatherDataDictObjectAll, dfStations = cleanData(weatherDataDictObjectAll=weatherDataDictObjectAll, dirname=dirname)
+    # Save to JSON if dirname provided
     if writeJson == True:
-        writeToJson(data=dictAllData, outFileName=dirname+'/weatherDataJSONObject.json')
+        writeToJson(data=weatherDataDictObjectAll, outFileName=dirname+'/Data/weatherDataJSONObject.json')
     print("Successfully generated dictionary of all weather stations")
-    return dictAllData
-    
+    return weatherDataDictObjectAll, dfStations
+
 ##########################################################
 async def getCleanedDataStructure(inputData={}, dirname=''):
     ######################################################
     if inputData["parseDataBool"] == 0:
-        fileName = ['weatherDataJSONObject2018.json', 'weatherDataJSONObject.json'][0]
-        with open(dirname + fileName, 'r') as f:
+        fileName = ['weatherDataJSONObject2018.json', 'weatherDataJSONObject.json'][1]
+        with open(dirname +"/Data/" + fileName, 'r') as f:
             weatherDataDictObjectAll = json.load(f)
+        dfStations = pd.read_csv(dirname +"/Data/Weather Stations Info.csv")
     else:
         if inputData["booleanRunSeriesVsParallel"] == 1: # parserFunSlowAndInSeries took apx 700 seconds to complete
-            weatherDataDictObjectAll = parserFunSlowAndInSeries(inputData=inputData, dirname=dirname, writeJson=False)
+            weatherDataDictObjectAll, dfStations = parserFunSlowAndInSeries(inputData=inputData, dirname=dirname, writeJson=False)
         elif inputData["booleanRunSeriesVsParallel"] == 0: # parserFunParallelized    took apx 500 seconds to complete
-            weatherDataDictObjectAll = await parserFunParallelized(inputData=inputData, dirname=dirname, writeJson=False)
+            weatherDataDictObjectAll, dfStations = await parserFunParallelized(inputData=inputData, dirname=dirname, writeJson=True)
     ######################################################
-    # print(weatherDataDictObjectAll.keys())
-    ######################################################
-    return weatherDataDictObjectAll
+    return weatherDataDictObjectAll, dfStations
 
 ##########################################################

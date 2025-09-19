@@ -27,9 +27,9 @@ def generateInputFileDict():
     # for later, can create a sandox.py for inputs to map
     inputData = {}
     inputData["booleanRunSeriesVsParallel"] = 0
-    inputData["parseDataBool"] = [0, 1][0]
+    inputData["parseDataBool"] = [0, 1][1]
     if inputData["parseDataBool"] == 1:
-        inputData["idealDates"] = [2018, 2019, 2020, 2021, 2022] # user specify years
+        inputData["idealDates"] = [2018, 2019, 2020, 2021, 2022]#, 2023, 2024] # user specify years
         if inputData["booleanRunSeriesVsParallel"] == 0:
             inputData["batchSize"] = 20
     return inputData
