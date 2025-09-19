@@ -206,7 +206,7 @@ async def parserFunParallelized(inputData={}, dirname='', writeJson=False):
     weatherDataDictObjectAll, dfStations = cleanData(weatherDataDictObjectAll=weatherDataDictObjectAll, dirname=dirname)
     # Save to JSON if dirname provided
     if writeJson == True:
-        writeToJson(data=dictAllData, outFileName=dirname+'/Data/weatherDataJSONObject.json')
+        writeToJson(data=weatherDataDictObjectAll, outFileName=dirname+'/Data/weatherDataJSONObject.json')
     print("Successfully generated dictionary of all weather stations")
     return weatherDataDictObjectAll, dfStations
 
