@@ -1,6 +1,6 @@
 # Weather Forecasting Calculator
 
-A Python-based weather forecasting pipeline built around an async data ingestion and processing architecture, with a modular problem-type framework designed to support progressively advanced ML approaches — from exploratory feature analysis up to physics-informed Bayesian neural networks.
+A Python-based weather forecasting pipeline built around an async data ingestion and processing architecture, with a modular problem-type framework designed to support progressively advanced ML approaches — from exploratory feature analysis up to other ML/AI frameworks that bring in insights to the current project.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -22,7 +22,7 @@ The core entry point is `Calculator.py`, which runs an async pipeline that inges
 | `PROB01` | Feature analysis — correlation, uncertainty quantification, feature importance | 🔧 In progress |
 | `PROB02` | Geospatial modeling — 2D/3D spatial interpolation across station grid | 🗂 Planned |
 | `PROB03` | Time series forecasting — classical and ML-based approaches | 🗂 Planned |
-| `PROB04` | Physics-informed neural networks in a Bayesian framework | 🗂 Planned |
+| `PROB04` | Further ML/AI frameworks to draw insights into the current project | 🗂 Planned |
 
 The pipeline is async end-to-end using Python's `asyncio`, keeping the architecture non-blocking and ready to scale to larger datasets or concurrent workloads.
 
@@ -193,13 +193,13 @@ inputData["problemType"] = "PROB01"  # Change to PROB02, PROB03, or PROB04
 Generates statistical summaries and diagnostic plots for the cleaned weather station data. Planned outputs include correlation matrices, uncertainty estimates, and feature importance rankings to guide downstream modeling decisions.
 
 ### PROB02 — Geospatial Modeling
-Spatially interpolates weather observations across the station grid to produce 2D/3D field representations. The resulting spatial model serves as ground truth for predicting conditions at unobserved locations and times.
+Planned
 
 ### PROB03 — Time Series Forecasting
-Applies ML-based approaches to predict weather variables forward in time. Classical methods (ARIMA, exponential smoothing) alongside tree-based and neural forecasters.
+Planned
 
-### PROB04 — Physics-Informed Bayesian Neural Networks
-The most advanced problem type — integrates physical constraints directly into the neural network loss function within a Bayesian inference framework. Produces calibrated uncertainty estimates alongside predictions, leveraging domain knowledge to regularize the model.
+### PROB04 — Additional AI/ML Frameworks
+Planned
 
 ## Production Deployment
 
