@@ -193,13 +193,13 @@ inputData["problemType"] = "PROB01"  # Change to PROB02, PROB03, or PROB04
 Generates statistical summaries and diagnostic plots for the cleaned weather station data. Planned outputs include correlation matrices, uncertainty estimates, and feature importance rankings to guide downstream modeling decisions.
 
 ### PROB02 — Geospatial Modeling
-Planned
+Spatially interpolates weather observations across the station grid to produce 2D/3D field representations for predicting conditions at unobserved locations and times.
 
 ### PROB03 — Time Series Forecasting
-Planned
+Applies ML-based approaches to predict weather variables forward in time, spanning classical methods (ARIMA, exponential smoothing) through tree-based and neural forecasters.
 
 ### PROB04 — Additional AI/ML Frameworks
-Planned
+Reserved for more advanced modeling techniques to be determined as the project matures.
 
 ## Production Deployment
 
