@@ -22,7 +22,7 @@ inputData["problemType"] = "PROB01"  # swap to PROB02, PROB03, or PROB04
 ## Project Structure
 
 ```
-Weather-Forcasting/
+Weather-Forcasting-ML/
 ├── .devcontainer/                  # VS Code dev container config
 ├── .github/workflows/              # GitHub Actions CI/CD
 ├── weatherForcastingCalculator/
@@ -46,8 +46,8 @@ You've got three options depending on your setup.
 ### VS Code Dev Container (easiest)
 
 ```bash
-git clone git@github.com:tomskija/Weather-Forcasting.git
-cd Weather-Forcasting
+git clone git@github.com:tomskija/Weather-Forcasting-ML.git
+cd Weather-Forcasting-ML
 code .
 ```
 
@@ -62,8 +62,8 @@ Everything is pre-installed inside the container — Python 3.11, all dependenci
 ### Docker Compose
 
 ```bash
-git clone git@github.com:tomskija/Weather-Forcasting.git
-cd Weather-Forcasting
+git clone git@github.com:tomskija/Weather-Forcasting-ML.git
+cd Weather-Forcasting-ML
 docker-compose up weather-app-dev
 docker-compose exec weather-app-dev bash
 python Calculator.py
@@ -72,8 +72,8 @@ python Calculator.py
 ### Local Python
 
 ```bash
-git clone git@github.com:tomskija/Weather-Forcasting.git
-cd Weather-Forcasting
+git clone git@github.com:tomskija/Weather-Forcasting-ML.git
+cd Weather-Forcasting-ML
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -157,4 +157,4 @@ CI/CD is set up via GitHub Actions — runs tests on every push, builds and push
 
 ## Questions / Issues
 
-Open an issue [here](https://github.com/tomskija/Weather-Forcasting/issues).
+Open an issue [here](https://github.com/tomskija/Weather-Forcasting-ML/issues).
